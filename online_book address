@@ -1,0 +1,196 @@
+
+
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        // Class to store address information
+        class addressType {
+        public:
+            string street, city, state, zip_code;
+
+            addressType(string street = "", string city = "", string state = "", string zip_code = "")
+                : street(street), city(city), state(state), zip_code(zip_code) {}
+
+            void store_address(string street, string city, string state, string zip_code) {
+                this->street = street;
+                this->city = city;
+                this->state = state;
+                this->zip_code = zip_code;
+            }
+
+            void print_address() const {
+                cout << street << ", " << city << ", " << state << " " << zip_code << endl;
+            }
+        };
+
+        // Class to store date information
+        class dateType {
+        public:
+            int month, day, year;
+
+            dateType(int month = 0, int day = 0, int year = 0) 
+                : month(month), day(day), year(year) {}
+
+            void store_date(int month, int day, int year) {
+                this->month = month;
+                this->day = day;
+                this->year = year;
+            }
+
+            void print_date() const {
+                cout << month << "/" << day << "/" << year << endl;
+            }
+        };
+
+        // Class to store person information
+        class personType {
+        public:
+            string first_name, last_name;
+            addressType address;
+            string phone_number;
+
+            personType(string first_name = "", string last_name = "", addressType address = addressType(), string phone_number = "")
+                : first_name(first_name), last_name(last_name), address(address), phone_number(phone_number) {}
+
+            void store_person(string first_name, string last_name, addressType address, string phone_number) {
+                this->first_name = first_name;
+                this->last_name = last_name;
+                this->address = address;
+                this->phone_number = phone_number;
+            }
+
+            void print_person() const {
+                cout << "Name: " << first_name << " " << last_name << endl;
+                address.print_address();
+                cout << "Phone Number: " << phone_number << endl;
+            }
+        };
+
+        // Class to store extended person information, including classification and date of birth
+        class extPersonType : public personType {
+        public:
+            string classification;  // family, friend, or business associate
+            dateType date_of_birth;
+
+            extPersonType(string first_name = "", string last_name = "", addressType address = addressType(), string phone_number = "",
+                        string classification = "", dateType date_of_birth = dateType())
+                : personType(first_name, last_name, address, phone_number), classification(classification), date_of_birth(date_of_birth) {}
+
+            void store_extended_person(string first_name, string last_name, addressType address, string phone_number, string classification, dateType date_of_birth) {
+                store_person(first_name, last_name, address, phone_number);
+                this->classification = classification;
+                this->date_of_birth = date_of_birth;
+            }
+
+            void print_extended_person() const {
+                print_person();
+                cout << "Classification: " << classification << endl;
+                date_of_birth.print_date();
+            }
+        };
+
+        // Class to store and manage the address book
+      
+        class addressBookType {
+        private:
+            extPersonType entries[500];       // Maximum of 500 entries
+            int current_size = 0;            // Current number of entries in the address book
+
+        public:
+            void load_data(const extPersonType data[], int size) {
+                for (int i = 0; i < size; i++) {
+                    entries[i] = data[i];
+                }
+                current_size = size;
+            }
+
+            void sort_by_last_name() {
+                for (int i = 0; i < current_size - 1; i++) {
+                    for (int j = i + 1; j < current_size; j++) {
+                        if (entries[i].last_name > entries[j].last_name) {
+                            // Swap the two entries
+                            extPersonType temp = entries[i];
+                            entries[i] = entries[j];
+                            entries[j] = temp;
+                        }
+                    }
+                }
+            }
+
+            extPersonType* search_by_last_name(const string& last_name) {
+                for (int i = 0; i < current_size; i++) {
+                    if (entries[i].last_name == last_name) {
+                        return &entries[i];
+                    }
+                }
+                return nullptr;
+            }
+
+            void print_person_info(const string& last_name) {
+                extPersonType* person = search_by_last_name(last_name);
+                if (person) {
+                    person->print_extended_person();
+                } else {
+                    cout << "Person not found." << endl;
+                }
+            }
+
+            void print_birthday_in_month(int month) {
+                for (int i = 0; i < current_size; i++) {
+                    if (entries[i].date_of_birth.month == month) {
+                        cout << entries[i].first_name << " " << entries[i].last_name << endl;
+                    }
+                }
+            }
+
+            void print_names_between_last_names(const string& last_name1, const string& last_name2) {
+                for (int i = 0; i < current_size; i++) {
+                    if (entries[i].last_name >= last_name1 && entries[i].last_name <= last_name2) {
+                        cout << entries[i].first_name << " " << entries[i].last_name << endl;
+                    }
+                }
+            }
+
+            void print_classification(const string& classification) {
+                for (int i = 0; i < current_size; i++) {
+                    if (entries[i].classification == classification) {
+                        cout << entries[i].first_name << " " << entries[i].last_name << endl;
+                    }
+                }
+            }
+        };
+
+        int main() {
+            addressBookType address_book;
+
+            // Example entries
+            extPersonType data[] = {
+                extPersonType("John", "Doe", addressType("1234 Elm St", "Somewhere", "CA", "90210"), "123-456-7890", "family", dateType(5, 24, 1985)),
+                extPersonType("Jane", "Smith", addressType("5678 Oak St", "Elsewhere", "TX", "75001"), "987-654-3210", "friend", dateType(3, 15, 1990)),
+                extPersonType("James", "Brown", addressType("9101 Pine St", "Anycity", "FL", "33101"), "555-555-5555", "business", dateType(7, 20, 1980))
+            };
+
+            address_book.load_data(data, 3);
+
+            // Sorting by last name
+            address_book.sort_by_last_name();
+
+            // Print the person info by last name
+            cout << "Printing person info for last name 'Doe':" << endl;
+            address_book.print_person_info("Doe");
+
+            // Print the names of people with birthdays in a given month (e.g., month 3)
+            cout << "\nPeople with birthdays in month 3:" << endl;
+            address_book.print_birthday_in_month(3);
+
+            // Print the names between two last names
+            cout << "\nNames between 'Doe' and 'Smith':" << endl;
+            address_book.print_names_between_last_names("Doe", "Smith");
+
+            // Print all friends
+            cout << "\nAll friends:" << endl;
+            address_book.print_classification("friend");
+
+            return 0;
+        }
